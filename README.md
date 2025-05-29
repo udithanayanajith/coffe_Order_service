@@ -5,15 +5,20 @@ Overview
 --------
 
 Spring Boot microservice for processing coffee shop orders with queue management.
+This service handles order processing, status tracking, cancellation, and queue management for coffee shops with multiple queues.
+
+Description
+--------
+When a customer places an order, the system first validates that both the customer and shop are registered in the database. It then checks if the shop is currently open by verifying the current time against the shop's operating hours. The system confirms the requested queue number is valid for that location and ensures the queue isn't at full capacity. If all validations pass, it calculates the customer's position in the queue (current queue length + 1) and saves the order while incrementing the customer's loyalty score by 1 point. For status checks, the system retrieves the order details and calculates a 2-minute wait time per queue position. Order cancellation is only permitted for orders with a "WAITING" status. The queue status feature provides real-time queue length and wait time estimates (2 minutes per order) for each shop's queues. Throughout this process, the system enforces business rules including valid customer/shop registration, operating hour compliance, queue capacity limits, and status-based cancellation policies.
 
 Features
 --------
-
 *   Order creation with queue assignment
 *   Order status tracking
 *   Queue position monitoring
 *   Customer loyalty tracking
 *   Shop capacity management
+
 
 Tech Stack
 ----------
