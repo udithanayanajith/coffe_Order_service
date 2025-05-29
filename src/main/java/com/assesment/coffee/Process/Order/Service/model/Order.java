@@ -7,6 +7,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+
+/**
+ * Entity representing a coffee order in the order processing system.
+ * Maps to the "coffee_order" table in the database.
+ */
 @Entity
 @Data
 @Table(name = "coffee_order")

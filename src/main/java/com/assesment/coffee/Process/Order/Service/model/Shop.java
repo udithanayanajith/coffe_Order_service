@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalTime;
 
+
+/**
+ * Entity representing a coffee shop in the order processing system.
+ * Maps to the "shop" table in the database.
+ */
 @Entity
 @Data
 @Table(name = "shop")

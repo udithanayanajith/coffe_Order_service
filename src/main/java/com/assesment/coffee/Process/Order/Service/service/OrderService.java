@@ -12,13 +12,25 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Service class for processing coffee orders.
+ * Handles order creation, status retrieval, cancellation, and queue management.
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final ShopRepository shopRepository;
 
+    /**
+     * Processes a new coffee order and validates customer and shop details.
+     * Checks shop hours and queue capacity before saving the order.
+     *
+     * @param request the order request details
+     * @return the response containing the saved order information
+     */
     public OrderResponse processOrder(OrderRequest request) {
         // Validate customer
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -63,12 +75,23 @@ public class OrderService {
         return mapToResponse(savedOrder);
     }
 
+    /**
+     * Retrieves the status of a specified order.
+     *
+     * @param orderId the ID of the order
+     * @return the response containing order status information
+     */
     public OrderResponse getOrderStatus(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderProcessingException("Order not found"));
         return mapToResponse(order);
     }
 
+    /**
+     * Cancels an existing order if it is in the waiting status.
+     *
+     * @param orderId the ID of the order to cancel
+     */
     public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderProcessingException("Order not found"));
@@ -81,6 +104,14 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    /**
+     * Retrieves the queue status for a specific shop and queue number.
+     * Provides queue length and estimated wait time.
+     *
+     * @param shopId the ID of the shop
+     * @param queueNumber the specific queue number
+     * @return the response containing queue status information
+     */
     public QueueStatusResponse getQueueStatus(Long shopId, Integer queueNumber) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new OrderProcessingException("Shop not found"));
@@ -101,6 +132,12 @@ public class OrderService {
         return response;
     }
 
+    /**
+     * Maps an Order entity to an OrderResponse DTO.
+     *
+     * @param order the order entity to map
+     * @return the mapped OrderResponse
+     */
     private OrderResponse mapToResponse(Order order) {
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getId());

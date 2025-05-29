@@ -6,6 +6,10 @@ import io.swagger.v3.oas.models.info.Contact;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration for Swagger/OpenAPI documentation.
+ * Defines API metadata including title, description and contact info.
+ */
 @Configuration
 public class SwaggerConfig {
     @Bean
@@ -16,7 +20,7 @@ public class SwaggerConfig {
                         .description("API for processing coffee orders - Assessment Part 2")
                         .version("1.0")
                         .contact(new Contact()
-                                .name("Candidate")
-                                .email("candidate@example.com")));
+                                .name("Uditha")
+                                .email("udithanayanajith97@gmail.com")));
     }
 }

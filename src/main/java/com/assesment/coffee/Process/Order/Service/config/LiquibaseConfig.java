@@ -5,7 +5,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
-@Configuration
+/**
+ * Configures Liquibase for database migrations.
+ * Defines changelog location and data source.
+ */
+ @Configuration
 public class LiquibaseConfig {
     @Bean
     public SpringLiquibase liquibase(DataSource dataSource) {
