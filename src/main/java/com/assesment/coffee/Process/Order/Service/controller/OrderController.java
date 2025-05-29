@@ -1,0 +1,49 @@
+package com.assesment.coffee.Process.Order.Service.controller;
+
+import com.assesment.coffee.Process.Order.Service.dto.OrderRequest;
+import com.assesment.coffee.Process.Order.Service.dto.OrderResponse;
+import com.assesment.coffee.Process.Order.Service.dto.QueueStatusResponse;
+import com.assesment.coffee.Process.Order.Service.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/orders")
+@Tag(name = "Order Processing", description = "Endpoints for coffee order processing")
+public class OrderController {
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @PostMapping
+    @Operation(summary = "Process new order", description = "Creates and queues a new coffee order")
+    public ResponseEntity<OrderResponse> processOrder(@Valid @RequestBody OrderRequest request) {
+        return ResponseEntity.ok(orderService.processOrder(request));
+    }
+
+    @GetMapping("/{orderId}")
+    @Operation(summary = "Get order status", description = "Returns current queue position and status")
+    public ResponseEntity<OrderResponse> getOrderStatus(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.getOrderStatus(orderId));
+    }
+
+    @DeleteMapping("/{orderId}")
+    @Operation(summary = "Cancel order", description = "Removes an order from the queue")
+    public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
+        orderService.cancelOrder(orderId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/queue/{shopId}")
+    @Operation(summary = "Get queue status", description = "Returns queue length and wait time estimate")
+    public ResponseEntity<QueueStatusResponse> getQueueStatus(
+            @PathVariable Long shopId,
+            @RequestParam(required = false) Integer queueNumber) {
+        return ResponseEntity.ok(orderService.getQueueStatus(shopId, queueNumber));
+    }
+}
