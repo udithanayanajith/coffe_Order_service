@@ -2,6 +2,8 @@ package com.assesment.coffee.Process.Order.Service.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -24,7 +26,7 @@ public class OrderResponse {
     private String itemName;
 
     @Schema(description = "Price of the item ordered", example = "4.99")
-    private Double itemPrice;
+    private Float itemPrice;
 
     @Schema(description = "Queue number assigned to the order", example = "1")
     private Integer queueNumber;

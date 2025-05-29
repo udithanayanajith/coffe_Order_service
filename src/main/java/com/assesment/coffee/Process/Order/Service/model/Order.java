@@ -29,7 +29,7 @@ public class Order {
     private Shop shop;
 
     private String itemName;
-    private Double itemPrice;
+    private Float itemPrice;
     private Integer queueNumber = 1;
     private Integer queuePosition;
     private String status = "WAITING";

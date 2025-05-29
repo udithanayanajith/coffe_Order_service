@@ -86,7 +86,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: item_price
-                  type: DECIMAL(10,2)
+                  type: FLOAT
                   constraints:
                     nullable: false
               - column:

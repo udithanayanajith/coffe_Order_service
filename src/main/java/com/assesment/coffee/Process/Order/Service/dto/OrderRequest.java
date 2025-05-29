@@ -25,7 +25,7 @@ public class OrderRequest {
 
     @Positive
     @Schema(description = "Price of the item being ordered", example = "4.99")
-    private Double itemPrice;
+    private Float itemPrice;
 
     @Min(1)
     @Max(3)

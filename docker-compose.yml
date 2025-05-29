@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: pg-db
+    restart: always
+    environment:
+      POSTGRES_DB: coffee_orders
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    networks:
+      - springnet
+
+  app:
+    build: .
+    container_name: spring_boot_order_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - springnet
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/coffee_orders
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+
+
+networks:
+  springnet:
+    driver: bridge
