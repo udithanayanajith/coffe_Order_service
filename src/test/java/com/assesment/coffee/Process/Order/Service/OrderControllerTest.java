@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -28,7 +30,7 @@ public class OrderControllerTest {
         request.setCustomerId(1L);
         request.setShopId(1L);
         request.setItemName("Latte");
-        request.setItemPrice(4.99f);
+        request.setItemPrice(BigDecimal.valueOf(5.56));
         request.setQueueNumber(1);
 
         mockMvc.perform(post("/api/v1/orders")

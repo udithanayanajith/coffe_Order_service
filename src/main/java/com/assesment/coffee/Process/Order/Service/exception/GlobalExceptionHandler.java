@@ -3,6 +3,7 @@ package com.assesment.coffee.Process.Order.Service.exception;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,6 +23,20 @@ public class GlobalExceptionHandler {
         log.warn("Business error: {}", ex.getTechnicalDetail());
 
         return ResponseEntity.badRequest().body(
+                new ErrorResponse(
+                        ex.getUserMessage(),
+                        ex.getTechnicalDetail(),
+                        Instant.now(),
+                        request.getDescription(false)
+                )
+        );
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(
+            AuthenticationException ex, WebRequest request) {
+        log.warn("Authentication error: {}", ex.getTechnicalDetail());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 new ErrorResponse(
                         ex.getUserMessage(),
                         ex.getTechnicalDetail(),

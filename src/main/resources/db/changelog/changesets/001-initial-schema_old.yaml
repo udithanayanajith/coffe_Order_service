@@ -1,0 +1,108 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: uditha_nayanajith
+      changes:
+        - createTable:
+            tableName: customer
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mobile_number
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: loyalty_score
+                  type: INTEGER
+                  defaultValue: 0
+
+        - createTable:
+            tableName: shop
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: TEXT
+              - column:
+                  name: opening_time
+                  type: TIME
+              - column:
+                  name: closing_time
+                  type: TIME
+              - column:
+                  name: max_queues
+                  type: INTEGER
+                  defaultValue: 1
+              - column:
+                  name: queue_size
+                  type: INTEGER
+                  defaultValue: 10
+
+        - createTable:
+            tableName: coffee_order
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: customer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_customer
+                    references: customer(id)
+              - column:
+                  name: shop_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_shop
+                    references: shop(id)
+              - column:
+                  name: item_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: item_price
+                  type: FLOAT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: queue_number
+                  type: INTEGER
+                  defaultValue: 1
+              - column:
+                  name: queue_position
+                  type: INTEGER
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: 'WAITING'
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP

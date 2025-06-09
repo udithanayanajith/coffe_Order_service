@@ -5,6 +5,7 @@ import com.assesment.coffee.Process.Order.Service.dto.OrderResponse;
 import com.assesment.coffee.Process.Order.Service.dto.QueueStatusResponse;
 import com.assesment.coffee.Process.Order.Service.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller for handling coffee order processing requests.
- * Manages the lifecycle of orders including creation, status retrieval, and cancellation.
+ * Secured endpoints require valid JWT token in Authorization header (Bearer token).
+ * Manages order lifecycle including creation, status retrieval, and cancellation.
+ * Provides queue status information for coffee shops.
+ * All endpoints return 401 Unauthorized if invalid/missing token is provided.
  */
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/orders")
 @Tag(name = "Order Processing", description = "Endpoints for coffee order processing")
@@ -23,6 +28,7 @@ public class OrderController {
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
+
     /**
      * Processes a new coffee order and queues it.
      *
@@ -31,7 +37,8 @@ public class OrderController {
      */
     @PostMapping
     @Operation(summary = "Process new order", description = "Creates and queues a new coffee order")
-    public ResponseEntity<OrderResponse> processOrder(@Valid @RequestBody OrderRequest request) {
+    public ResponseEntity<OrderResponse> processOrder(
+            @Valid @RequestBody OrderRequest request            )  {
         return ResponseEntity.ok(orderService.processOrder(request));
     }
 

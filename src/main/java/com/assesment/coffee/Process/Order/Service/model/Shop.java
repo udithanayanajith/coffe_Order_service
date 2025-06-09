@@ -2,6 +2,7 @@ package com.assesment.coffee.Process.Order.Service.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalTime;
 
 
