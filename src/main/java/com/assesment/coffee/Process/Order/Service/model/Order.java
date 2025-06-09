@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 
@@ -29,7 +30,7 @@ public class Order {
     private Shop shop;
 
     private String itemName;
-    private Float itemPrice;
+    private BigDecimal itemPrice;
     private Integer queueNumber = 1;
     private Integer queuePosition;
     private String status = "WAITING";

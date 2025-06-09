@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * Data Transfer Object (DTO) for creating a new coffee order request.
  * Validates the input data for order processing.
@@ -25,7 +27,7 @@ public class OrderRequest {
 
     @Positive
     @Schema(description = "Price of the item being ordered", example = "4.99")
-    private Float itemPrice;
+    private BigDecimal itemPrice;
 
     @Min(1)
     @Max(3)

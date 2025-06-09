@@ -26,7 +26,7 @@ public class OrderResponse {
     private String itemName;
 
     @Schema(description = "Price of the item ordered", example = "4.99")
-    private Float itemPrice;
+    private BigDecimal itemPrice;
 
     @Schema(description = "Queue number assigned to the order", example = "1")
     private Integer queueNumber;

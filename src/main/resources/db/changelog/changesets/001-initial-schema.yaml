@@ -25,6 +25,13 @@ databaseChangeLog:
                   name: loyalty_score
                   type: INTEGER
                   defaultValue: 0
+        - createIndex:
+            indexName: idx_customer_mobile
+            tableName: customer
+            columns:
+              - column:
+                  name: mobile_number
+                  type: VARCHAR(20)
 
         - createTable:
             tableName: shop
@@ -56,6 +63,13 @@ databaseChangeLog:
                   name: queue_size
                   type: INTEGER
                   defaultValue: 10
+        - createIndex:
+            indexName: idx_shop_name
+            tableName: shop
+            columns:
+              - column:
+                  name: name
+                  type: VARCHAR(100)
 
         - createTable:
             tableName: coffee_order
@@ -86,7 +100,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: item_price
-                  type: FLOAT
+                  type: NUMERIC(10,2)  # Changed from FLOAT to NUMERIC to for prices to avoid rounding issues as per the instructions.
                   constraints:
                     nullable: false
               - column:
@@ -106,3 +120,37 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: TIMESTAMP
+        - createIndex:
+            indexName: idx_order_customer
+            tableName: coffee_order
+            columns:
+              - column:
+                  name: customer_id
+                  type: BIGINT
+        - createIndex:
+            indexName: idx_order_shop
+            tableName: coffee_order
+            columns:
+              - column:
+                  name: shop_id
+                  type: BIGINT
+        - createIndex:
+            indexName: idx_order_status
+            tableName: coffee_order
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+        - createIndex:
+            indexName: idx_order_queue
+            tableName: coffee_order
+            columns:
+              - column:
+                  name: shop_id
+                  type: BIGINT
+              - column:
+                  name: queue_number
+                  type: INTEGER
+              - column:
+                  name: status
+                  type: VARCHAR(20)
