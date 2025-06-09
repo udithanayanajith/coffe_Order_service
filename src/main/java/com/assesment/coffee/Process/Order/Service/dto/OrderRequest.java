@@ -27,6 +27,8 @@ public class OrderRequest {
 
     @Positive
     @Schema(description = "Price of the item being ordered", example = "4.99")
+    @DecimalMin("0.01")
+
     private BigDecimal itemPrice;
 
     @Min(1)
