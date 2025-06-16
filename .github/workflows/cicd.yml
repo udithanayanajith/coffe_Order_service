@@ -17,80 +17,53 @@ jobs:
   build-and-deploy:
     runs-on: self-hosted
     steps:
-      # 1. PRE-BUILD CLEANUP
-      - name: Free up system resources
+      - name: Free resources
         run: |
           sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
           docker system prune -f
           sudo pkill -9 java || true
 
-      # 2. CHECKOUT
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 3. SETUP JAVA WITH MEMORY LIMITS
-      - name: Set up JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          jdkFile: /tmp/jdk17.tar.gz
 
-      # 4. OPTIMIZED MAVEN BUILD
-      - name: Build with Maven
+      - name: Maven build
         run: |
           export MAVEN_OPTS="-Xms256m -Xmx512m -XX:+UseSerialGC"
-          mvn clean package -T 1C \
-            -DskipTests \
-            -Dmaven.compiler.source=17 \
-            -Dmaven.compiler.target=17 \
-            -Dmaven.test.skip=true
+          mvn clean package -T 1C -DskipTests -Dmaven.test.skip=true
 
-      # 5. DOCKER IMAGE BUILD WITH CACHE
-      - name: Build Docker image
+      - name: Docker build
         run: |
-          docker buildx create --use  # Initialize buildx
+          docker buildx create --use
           docker buildx build \
             --platform linux/amd64 \
             -t $APP_NAME:${{ github.run_number }} \
             -t $APP_NAME:latest \
-            --load .  # Important for single-node builds
-          
-          # Clean up buildx
+            --load .
           docker buildx prune -f
 
-      # 6. CONTROLLED DEPLOYMENT
-      - name: Deploy with Docker Compose
+      - name: Deploy
         run: |
           docker-compose down --remove-orphans --timeout 30
           docker network create $DOCKER_NETWORK || true
-          docker-compose up -d --scale app=1 --no-recreate
+          docker-compose up -d
 
-      # 7. HEALTH VERIFICATION
-      - name: Verify deployment
+      - name: Verify
         timeout-minutes: 5
         run: |
-          echo "Waiting for services to start..."
-          sleep 30
-          
-          # Check container status
-          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-          
-          # Test health endpoint
+          sleep 20
           curl -sSf http://localhost/actuator/health | jq .
           curl -sSf http://localhost/test | jq .
 
-      # 8. RESOURCE MONITORING
-      - name: System status report
+      - name: System report
         if: always()
         run: |
-          echo "===== MEMORY ====="
           free -h
-          
-          echo "===== DISK ====="
           df -h
-          
-          echo "===== DOCKER ====="
           docker system df
-          docker stats --no-stream
