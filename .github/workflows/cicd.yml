@@ -1,64 +1,40 @@
-name: Build, Version & Deploy on EC2
+name: Build, Push & Deploy on EC2
 
 on:
   push:
     branches: ["main"]
 
-env:
-  APP_VERSION: ${{ github.run_number }}  # Unique version per run
-  APP_NAME: coffee-order-service
-
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
+    runs-on: self-hosted  # Runs on your EC2 runner
     steps:
       # 1. Checkout code
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Conditional Java/Maven setup
-      - name: Check for Java
-        id: check-java
-        run: |
-          if [ ! -f "/usr/bin/java" ]; then
-            echo "::set-output name=install_java::true"
-          fi
-
-      - name: Install Java/Maven
-        if: steps.check-java.outputs.install_java == 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk maven
-          java -version
-          mvn --version
-
-      # 3. Build with cached dependencies
+      # 2. Set up Java and Maven
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+    
       - name: Build with Maven
+        run: mvn clean package -DskipTests -Dmaven.compiler.source=17 -Dmaven.compiler.target=17
+
+      # 4. Build Docker image locally
+      - name: Build Docker image
         run: |
-          mvn clean package -DskipTests -Dmaven.compiler.source=17 -Dmaven.compiler.target=17
+          docker build -t coffee-order-service .
 
-      # 4. Versioned Docker build
-      - name: Build Docker images
-        run: |
-          # Build versioned image
-          docker build -t $APP_NAME:$APP_VERSION .
-          # Tag as latest
-          docker tag $APP_NAME:$APP_VERSION $APP_NAME:latest
-
-          # Cleanup old images (keep last 3 versions)
-          docker images $APP_NAME --format "{{.ID}} {{.Tag}}" | \
-          sort -rn | awk 'NR>3 {print $1}' | \
-          xargs -r docker rmi || true
-
-      # 5. Deployment
+      # 5. Stop old containers and deploy
       - name: Deploy with Docker Compose
         run: |
           docker-compose down || true
           docker-compose up -d || (docker-compose logs && exit 1)
 
-      # 6. Verification
-      - name: Verify deployment
+      - name: Notify on success
+        if: success()
         run: |
-          echo "Deployed version $APP_VERSION"
-          docker inspect $APP_NAME:latest --format '{{.Id}}'
-          curl -s http://localhost/actuator/health | jq .
+          echo "Deployment successful!"
