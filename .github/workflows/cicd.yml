@@ -31,8 +31,11 @@ jobs:
       # 5. Stop old containers and deploy
       - name: Deploy with Docker Compose
         run: |
-          docker-compose down || true
-          docker-compose up -d || (docker-compose logs && exit 1)
+          docker-compose down || true  # If using standalone
+          docker-compose up -d
+          # OR
+          docker compose down || true  # If using plugin
+          docker compose up -d
           
       - name: Notify on success
         if: success()
