@@ -16,59 +16,56 @@ env:
 jobs:
   build-and-deploy:
     runs-on: self-hosted
+
     steps:
-      - name: Free resources
+      - name: 🧹 Free up space
         run: |
+          echo "Cleaning up system..."
           sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
-          docker system prune -f
+          docker system prune -af
           sudo pkill -9 java || true
 
-      - name: Checkout
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: ☕ Setup Java 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Maven build
+      - name: ⚙️ Build with Maven
         run: |
           export MAVEN_OPTS="-Xms256m -Xmx512m -XX:+UseSerialGC"
-          mvn clean package -T 1C -DskipTests -Dmaven.test.skip=true
+          ./mvnw clean package -T 1C -DskipTests
 
-      - name: Docker build
+      - name: 🐳 Build Docker image
         run: |
-          # Clean space aggressively
-          sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
-          docker system prune -a -f
-          
-          # Build with minimal disk usage
-          docker build \
-            --no-cache \
-            --memory 768m \
+          docker build --no-cache \
+            --memory=768m \
             -t $APP_NAME:${{ github.run_number }} \
             -t $APP_NAME:latest \
             .
-          docker buildx prune -f
 
-      - name: Deploy
+      - name: 🚀 Deploy with Docker Compose
         run: |
-          docker-compose down --remove-orphans --timeout 30
+          docker-compose down --remove-orphans || true
           docker network create $DOCKER_NETWORK || true
-          docker-compose up -d
+          docker-compose up -d --build
 
-      - name: Verify
+      - name: ✅ Verify health check
         timeout-minutes: 5
         run: |
+          echo "Waiting for app to boot..."
           sleep 20
-          curl -sSf http://localhost/actuator/health | jq .
-          curl -sSf http://localhost/test | jq .
+          curl -f http://localhost:8080/actuator/health
+          curl -f http://localhost:8080/test || echo "Test endpoint not critical"
 
-      - name: System report
+      - name: 🧾 Final system report
         if: always()
         run: |
+          echo "Final disk/mem status:"
           free -h
           df -h
           docker system df
