@@ -24,7 +24,10 @@ services:
     networks:
       - springnet
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/coffee_orders
+#      for ec2
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/coffee_orders
+#      local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/coffee_orders
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
 
