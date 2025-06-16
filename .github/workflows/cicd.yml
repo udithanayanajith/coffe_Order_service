@@ -1,39 +1,35 @@
-name: Build Spring Boot & Push to Docker Hub
+name: Build, Push & Deploy on EC2
 
 on:
   push:
-    branches: ["main"]  # Runs on push to main
+    branches: ["main"]
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: self-hosted
     steps:
       # 1. Checkout code
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Set up Java (Maven/Gradle will use this)
+      # 2. Set up Java
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "temurin"
 
-      # 3. Build JAR (Maven)
+      # 3. Build JAR
       - name: Build with Maven
-        run: mvn clean package -DskipTests  # Skips tests (optional)
+        run: mvn clean package -DskipTests
 
-      # 4. Log in to Docker Hub
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # 4. Build Docker image locally (no push to Docker Hub needed)
+      - name: Build Docker image
+        run: |
+          docker build -t coffee-order-service .
 
-      # 5. Build & Push Docker Image
-      - name: Build and Push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/coffee-order-service:latest
+      # 5. Stop old containers and deploy
+      - name: Deploy with Docker Compose
+        run: |
+          docker-compose down || true
+          docker-compose up -d
