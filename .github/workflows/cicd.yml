@@ -40,12 +40,17 @@ jobs:
 
       - name: Docker build
         run: |
-          docker buildx create --use
-          docker buildx build \
-            --platform linux/amd64 \
+          # Clean space aggressively
+          sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
+          docker system prune -a -f
+          
+          # Build with minimal disk usage
+          docker build \
+            --no-cache \
+            --memory 768m \
             -t $APP_NAME:${{ github.run_number }} \
             -t $APP_NAME:latest \
-            --load .
+            .
           docker buildx prune -f
 
       - name: Deploy
