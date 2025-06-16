@@ -101,4 +101,17 @@ public class OrderController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/test-two")
+    @Operation( summary = "CI/CD Health Check",
+            description = "Verifies the deployment pipeline is functioning properly"
+    )
+    public ResponseEntity<Map<String, String>> testAPITwo() {
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "CI/CD pipeline operational");
+        response.put("timestamp", Instant.now().toString());
+
+        return ResponseEntity.ok(response);
+    }
 }
