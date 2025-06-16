@@ -37,8 +37,10 @@ jobs:
 
       - name: ⚙️ Build with Maven
         run: |
+          chmod +x ./mvnw
           export MAVEN_OPTS="-Xms256m -Xmx512m -XX:+UseSerialGC"
           ./mvnw clean package -T 1C -DskipTests
+
 
       - name: 🐳 Build Docker image
         run: |
