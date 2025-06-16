@@ -1,83 +1,40 @@
-name: Spring Boot CI/CD Pipeline
+name: Build, Push & Deploy on EC2
 
 on:
   push:
     branches: ["main"]
-    paths:
-      - 'src/**'
-      - 'pom.xml'
-      - 'Dockerfile'
-      - '.github/workflows/cicd.yml'
-
-env:
-  APP_NAME: "coffee-order-service"
-  DOCKER_NETWORK: "springnet"
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
-
+    runs-on: self-hosted  # Runs on your EC2 runner
     steps:
-      - name: 🚿 Clean up disk before build
-        run: |
-          docker system prune -a -f --volumes
-          sudo rm -rf /var/lib/docker/tmp/*
-          sudo journalctl --vacuum-time=1d || true
-          sudo apt-get clean || true
-          df -h
-
-
-      - name: 🧹 Free up space
-        run: |
-          echo "Cleaning up system..."
-          sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
-          docker system prune -af
-          sudo pkill -9 java || true
-          
-
-      - name: 📥 Checkout code
+      # 1. Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ☕ Setup Java 17
+      # 2. Set up Java and Maven
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
+    
+      - name: Build with Maven
+        run: mvn clean package -DskipTests -Dmaven.compiler.source=17 -Dmaven.compiler.target=17
 
-      - name: ⚙️ Build with Maven
+      # 4. Build Docker image locally
+      - name: Build Docker image
         run: |
-          chmod +x ./mvnw
-          export MAVEN_OPTS="-Xms256m -Xmx512m -XX:+UseSerialGC"
-          ./mvnw clean package -T 1C -DskipTests
+          docker build -t coffee-order-service .
 
-
-      - name: 🐳 Build Docker image
+      # 5. Stop old containers and deploy
+      - name: Deploy with Docker Compose
         run: |
-          docker build --no-cache \
-            --memory=768m \
-            -t $APP_NAME:${{ github.run_number }} \
-            -t $APP_NAME:latest \
-            .
+          docker-compose down || true
+          docker-compose up -d || (docker-compose logs && exit 1)
 
-      - name: 🚀 Deploy with Docker Compose
+      - name: Notify on success
+        if: success()
         run: |
-          docker-compose down --remove-orphans || true
-          docker network create $DOCKER_NETWORK || true
-          docker-compose up -d --build
-
-      - name: ✅ Verify health check
-        timeout-minutes: 5
-        run: |
-          echo "Waiting for app to boot..."
-          sleep 20
-          curl -f http://localhost:8080/actuator/health
-          curl -f http://localhost:8080/test || echo "Test endpoint not critical"
-
-      - name: 🧾 Final system report
-        if: always()
-        run: |
-          echo "Final disk/mem status:"
-          free -h
-          df -h
-          docker system df
+          echo "Deployment successful!"
