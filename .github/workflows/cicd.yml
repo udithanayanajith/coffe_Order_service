@@ -50,12 +50,15 @@ jobs:
       # 5. DOCKER IMAGE BUILD WITH CACHE
       - name: Build Docker image
         run: |
-          docker build \
-            --memory 768m \
-            --cpus 1 \
+          docker buildx create --use  # Initialize buildx
+          docker buildx build \
+            --platform linux/amd64 \
             -t $APP_NAME:${{ github.run_number }} \
             -t $APP_NAME:latest \
-            .
+            --load .  # Important for single-node builds
+          
+          # Clean up buildx
+          docker buildx prune -f
 
       # 6. CONTROLLED DEPLOYMENT
       - name: Deploy with Docker Compose
