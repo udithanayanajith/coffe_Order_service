@@ -11,6 +11,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Controller for handling coffee order processing requests.
  * Secured endpoints require valid JWT token in Authorization header (Bearer token).
@@ -81,5 +85,20 @@ public class OrderController {
             @PathVariable Long shopId,
             @RequestParam(required = false) Integer queueNumber) {
         return ResponseEntity.ok(orderService.getQueueStatus(shopId, queueNumber));
+    }
+
+
+
+    @GetMapping("/test")
+    @Operation( summary = "CI/CD Health Check",
+            description = "Verifies the deployment pipeline is functioning properly"
+    )
+    public ResponseEntity<Map<String, String>> testAPI() {
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "CI/CD pipeline operational");
+        response.put("timestamp", Instant.now().toString());
+
+        return ResponseEntity.ok(response);
     }
 }
