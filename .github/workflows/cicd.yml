@@ -18,12 +18,22 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: 🚿 Clean up disk before build
+        run: |
+          docker system prune -a -f --volumes
+          sudo rm -rf /var/lib/docker/tmp/*
+          sudo journalctl --vacuum-time=1d || true
+          sudo apt-get clean || true
+          df -h
+
+
       - name: 🧹 Free up space
         run: |
           echo "Cleaning up system..."
           sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
           docker system prune -af
           sudo pkill -9 java || true
+          
 
       - name: 📥 Checkout code
         uses: actions/checkout@v4
