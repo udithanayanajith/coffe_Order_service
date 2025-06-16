@@ -1,39 +1,23 @@
-services:
-  db:
-    image: postgres:latest
-    container_name: pg-db
-    restart: always
-    environment:
-      POSTGRES_DB: coffee_orders
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-    ports:
-      - "5432:5432"
-    networks:
-      - springnet
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+version: '3.8'
 
+services:
   app:
     image: coffee-order-service
     container_name: spring_boot_order_app
+    restart: unless-stopped
     ports:
-      - "80:8080"
-    depends_on:
-      - db
-    networks:
-      - springnet
+      - "80:8080"  # Map host port 80 to container port 8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Critical for host machine access
     environment:
-#      for ec2
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/coffee_orders
-#      local
       SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/coffee_orders
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_LIQUIBASE_ENABLED: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-networks:
-  springnet:
-    driver: bridge
-
-volumes:
-  postgres_data:  # Ensure data persists
