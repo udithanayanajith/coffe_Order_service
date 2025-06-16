@@ -23,7 +23,7 @@ jobs:
           if [ ! -f "/usr/bin/java" ]; then
             echo "::set-output name=install_java::true"
           fi
-
+      
       - name: Install Java/Maven
         if: steps.check-java.outputs.install_java == 'true'
         run: |
